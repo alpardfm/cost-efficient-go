@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🔬 DAY 3: Map Internals & Memory Overhead")
+	fmt.Println("🔬 Map Internals & Memory Overhead")
 	fmt.Println(strings.Repeat("=", 60))
 	fmt.Printf("📅 Date: %s\n\n", time.Now().Format("2006-01-02"))
 
@@ -43,8 +43,7 @@ func main() {
 	fmt.Println(strings.Repeat("=", 60))
 	calculateMapCostImpact()
 
-	fmt.Println("\n✅ DAY 3 COMPLETED! 🎉")
-	fmt.Println("\n🔜 Next: Day 4 - JSON Processing Efficiency")
+	fmt.Println("\n✅ PATTERN COMPLETED! 🎉")
 }
 
 func revealMapOverhead() {

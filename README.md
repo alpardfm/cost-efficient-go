@@ -20,9 +20,9 @@ Every pattern answers: **"How much money does this optimization save at scale?"*
 | 5 | **Profiling & Benchmarking** | Correct measurement techniques, percentiles | [→](patterns/profiling-benchmarking/) |
 | 6 | **Connection Pooling** | 2.7x faster, 40x less memory per request | [→](patterns/connection-pooling/) |
 | 7 | **Query Optimization** | 4.4x faster SELECT, 50x faster with batch, O(1) pagination | [→](patterns/query-optimization/) |
-| 8 | HTTP Client Optimization | *coming soon* | |
-| 9 | Worker Pool Pattern | *coming soon* | |
-| 10 | Caching Strategies | *coming soon* | |
+| 8 | **HTTP Client Optimization** | 2.6x faster with body drain, timeout protection | [→](patterns/http-client-optimization/) |
+| 9 | **Worker Pool Pattern** | Controlled concurrency, 99.9% less goroutine memory | [→](patterns/worker-pool/) |
+| 10 | **Caching Strategies** | 21,872x faster cache hit, 99% DB load reduction | [→](patterns/caching-strategies/) |
 
 ---
 

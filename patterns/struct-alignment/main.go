@@ -22,7 +22,7 @@ type GoodUser struct {
 }
 
 func main() {
-	fmt.Println("🔬 DAY 1: Memory Layout & Struct Alignment")
+	fmt.Println("🔬 Memory Layout & Struct Alignment")
 	fmt.Println(strings.Repeat("=", 60))
 	fmt.Printf("📅 Date: %s\n\n", time.Now().Format("2006-01-02"))
 
@@ -71,7 +71,7 @@ func main() {
 	fmt.Println(strings.Repeat("=", 60))
 	calculateCostImpact(badMemory, goodMemory)
 
-	fmt.Println("\n✅ DAY 1 COMPLETED! 🎉")
+	fmt.Println("\n✅ PATTERN COMPLETED! 🎉")
 }
 
 func benchmarkBadUser(count int) (time.Duration, uintptr) {

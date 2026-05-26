@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🔬 DAY 2: Slice Performance & Pre-allocation")
+	fmt.Println("🔬 Slice Performance & Pre-allocation")
 	fmt.Println(strings.Repeat("=", 60))
 	fmt.Printf("📅 Date: %s\n\n", time.Now().Format("2006-01-02"))
 
@@ -53,8 +53,7 @@ func main() {
 	fmt.Println(strings.Repeat("=", 60))
 	calculateCostImpact(t1, t2, m1, m2)
 
-	fmt.Println("\n✅ DAY 2 COMPLETED! 🎉")
-	fmt.Println("\n🔜 Next: Day 3 - Map Internals & Memory Overhead")
+	fmt.Println("\n✅ PATTERN COMPLETED! 🎉")
 }
 
 // ========== BENCHMARK FUNCTIONS ==========
