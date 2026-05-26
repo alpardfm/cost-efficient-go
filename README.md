@@ -19,7 +19,7 @@ Every pattern answers: **"How much money does this optimization save at scale?"*
 | 4 | **JSON Processing Efficiency** | 2x faster batch, 77% less bandwidth | [→](patterns/json-processing/) |
 | 5 | **Profiling & Benchmarking** | Correct measurement techniques, percentiles | [→](patterns/profiling-benchmarking/) |
 | 6 | **Connection Pooling** | 2.7x faster, 40x less memory per request | [→](patterns/connection-pooling/) |
-| 7 | Query Optimization | *coming soon* | |
+| 7 | **Query Optimization** | 4.4x faster SELECT, 50x faster with batch, O(1) pagination | [→](patterns/query-optimization/) |
 | 8 | HTTP Client Optimization | *coming soon* | |
 | 9 | Worker Pool Pattern | *coming soon* | |
 | 10 | Caching Strategies | *coming soon* | |
