@@ -294,7 +294,7 @@ go test -v
 
 ### **Follow-up Exploration:**
 
-1. **Day 4**: JSON Processing Efficiency
+1. **JSON Processing Efficiency** — see [json-processing](../json-processing/)
 2. **Investigate** sync.Map for concurrent access
 3. **Explore** custom hash tables for specific use cases
 4. **Measure** real-world impact in your applications

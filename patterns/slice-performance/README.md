@@ -344,7 +344,7 @@ func putSlice(s []byte) {
 
 ### **Follow-up Exploration**
 
-1. **Day 3**: Map internals and memory overhead
+1. **Map internals and memory overhead** — see [map-internals](../map-internals/)
 2. **Investigate** `sync.Pool` for slice reuse
 3. **Explore** zero-allocation slicing techniques
 4. **Measure** real impact in your production applications
