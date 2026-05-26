@@ -1,6 +1,9 @@
 # 🚀 30-Day Cost-Aware Backend Challenge
 
-> Building high-performance, cost-efficient backend systems in Go
+![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+> Building high-performance, cost-efficient backend systems in Go — with benchmarks and real cost analysis.
 
 ## 🎯 Goals
 1. **Master performance optimization** techniques in Go
@@ -97,7 +100,7 @@ make --version
 ### **Quick Start**
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-username/cost-aware-backend.git
+git clone https://github.com/alpardfm/cost-aware-backend.git
 cd cost-aware-backend
 
 # 2. Initialize Go modules
@@ -276,9 +279,9 @@ make help           # Show all commands
 
 ## **📞 Support**
 
-- **Issues:** [GitHub Issues](https://github.com/your-username/cost-aware-backend/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/your-username/cost-aware-backend/discussions)
-- **Twitter:** [@yourhandle](https://twitter.com/yourhandle) (Use hashtag #CostAwareBackend)
+- **Issues:** [GitHub Issues](https://github.com/alpardfm/cost-aware-backend/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/alpardfm/cost-aware-backend/discussions)
+- **Twitter:** [@alpardfm](https://github.com/alpardfm) (Use hashtag #CostAwareBackend)
 
 ## **📝 License**
 
