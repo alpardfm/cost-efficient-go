@@ -16,7 +16,7 @@ Every pattern answers: **"How much money does this optimization save at scale?"*
 | 1 | **Struct Alignment** | 25% memory reduction | [→](patterns/struct-alignment/) |
 | 2 | **Slice Pre-allocation** | 4x faster, 91% fewer allocations | [→](patterns/slice-performance/) |
 | 3 | **Map Internals & Overhead** | Understanding hidden memory costs | [→](patterns/map-internals/) |
-| 4 | JSON Processing Efficiency | *coming soon* | |
+| 4 | **JSON Processing Efficiency** | 2x faster batch, 77% less bandwidth | [→](patterns/json-processing/) |
 | 5 | Profiling & Benchmarking | *coming soon* | |
 | 6 | Connection Pooling | *coming soon* | |
 | 7 | Query Optimization | *coming soon* | |
