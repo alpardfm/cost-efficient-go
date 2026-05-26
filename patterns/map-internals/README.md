@@ -1,4 +1,4 @@
-# Day 3: Map Internals & Memory Overhead
+# Map Internals & Memory Overhead
 
 ## 📋 Overview
 Understanding Go map's hidden memory costs and when to use alternatives for better performance.
@@ -305,4 +305,3 @@ go test -v
 
 **Action Item:** Find at least one map in your codebase to optimize today!
 
-**Share your results:** #CostAwareBackend #Day3 #GoOptimization

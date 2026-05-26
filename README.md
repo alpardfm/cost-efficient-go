@@ -1,308 +1,96 @@
-# 🚀 30-Day Cost-Aware Backend Challenge
+# Cost-Efficient Go
 
 ![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-> Building high-performance, cost-efficient backend systems in Go — with benchmarks and real cost analysis.
+A collection of Go performance optimization patterns — each with benchmarks, memory analysis, and real AWS cost projections.
 
-## 🎯 Goals
-1. **Master performance optimization** techniques in Go
-2. **Understand the real cost** of code decisions
-3. **Build production-ready** systems with monitoring
-4. **Develop engineering economics** mindset
-5. **Create portfolio** of optimization case studies
+Every pattern answers: **"How much money does this optimization save at scale?"**
 
-## 📅 Daily Progress Tracker
+---
 
-| Day | Topic | Status | Impact | Commit |
-|-----|-------|--------|---------|--------|
-| 1 | Memory Layout & Struct Alignment | ✅ Done | 25% memory reduction | [#1](https://github.com/alpardfm/cost-aware-backend/tree/master/day-01) |
-| 2 | Slice vs Array Performance | ✅ Done | **4x faster, 91% fewer allocations** | [#2](https://github.com/alpardfm/cost-aware-backend/tree/master/day-02) |
-| 3 | Map Internals & Overhead | 🔄 In Progress | - | - |
-| 4 | JSON Processing Efficiency | ⏳ Pending | - | - |
-| 5 | Profiling & Benchmarking | ⏳ Pending | - | - |
-| 6 | Database Connection Pooling | ⏳ Pending | - | - |
-| 7 | Query Optimization & Indexing | ⏳ Pending | - | - |
-| 8 | HTTP Client Optimization | ⏳ Pending | - | - |
-| 9 | Worker Pool Pattern | ⏳ Pending | - | - |
-| 10 | Rate Limiting Strategies | ⏳ Pending | - | - |
-| 11 | Caching Strategies | ⏳ Pending | - | - |
-| 12 | Circuit Breaker Pattern | ⏳ Pending | - | - |
-| 13 | Observability & Metrics | ⏳ Pending | - | - |
-| 14 | Graceful Shutdown | ⏳ Pending | - | - |
-| 15 | Configuration Management | ⏳ Pending | - | - |
-| 16 | Health Checks & Probes | ⏳ Pending | - | - |
-| 17 | Feature Flags & Rollouts | ⏳ Pending | - | - |
-| 18-30 | Advanced Topics & Integration | ⏳ Pending | - | - |
+## Patterns
 
-## 📊 Overall Metrics Target
-**Target Improvements (After 30 Days):**
-- ✅ **50% reduction** in memory usage
-- ✅ **70% reduction** in database queries  
-- ✅ **40% improvement** in response time
-- ✅ **$100/month cost savings** per 10k users (simulated)
+| # | Pattern | Key Result | Link |
+|---|---------|-----------|------|
+| 1 | **Struct Alignment** | 25% memory reduction | [→](patterns/struct-alignment/) |
+| 2 | **Slice Pre-allocation** | 4x faster, 91% fewer allocations | [→](patterns/slice-performance/) |
+| 3 | **Map Internals & Overhead** | Understanding hidden memory costs | [→](patterns/map-internals/) |
+| 4 | JSON Processing Efficiency | *coming soon* | |
+| 5 | Profiling & Benchmarking | *coming soon* | |
+| 6 | Connection Pooling | *coming soon* | |
+| 7 | Query Optimization | *coming soon* | |
+| 8 | HTTP Client Optimization | *coming soon* | |
+| 9 | Worker Pool Pattern | *coming soon* | |
+| 10 | Caching Strategies | *coming soon* | |
 
-## 🏗️ Project Structure
-    cost-aware-backend/
+---
 
-    ├── README.md # Main documentation (this file)
-    ├── Makefile # Automation commands (build, test, run)
-    ├── go.mod # Go module definition
-    ├── docker-compose.yml # Local development infrastructure
-    ├── day-01/ # Day 1: Memory Optimization
-    │ ├── main.go # Implementation
-    │ ├── benchmark_test.go # Benchmarks and tests
-    │ └── README.md # Day-specific documentation
-    ├── day-02/ # Day 2: Slice Performance
-    ├── ... # Days 3-30 (following same structure)
-    ├── template/ # Template for new days
-    │ ├── main.go
-    │ ├── benchmark_test.go
-    │ └── README.md
-    ├── docs/ # Additional documentation
-    │ ├── concepts.md # Core concepts explained
-    │ └── results.md # Benchmark results summary
-    ├── scripts/ # Utility scripts
-    │ ├── setup.sh # Environment setup
-    │ └── benchmark.sh # Run all benchmarks
-    ├── shared/ # Shared code between days
-    │ ├── utils/ # Utility functions
-    │ └── types/ # Common data types
-    ├── benchmarks/ # Benchmark results
-    │ ├── day-01.txt # Day 1 benchmark results
-    │ └── comparisons.md # Performance comparisons
-    └── infra/ # Infrastructure configurations
-    ├── Dockerfile # Application Dockerfile
-    └── monitoring/ # Monitoring setup
+## Each Pattern Includes
 
-## 🛠️ Tech Stack
-- **Language:** Go 1.21+
-- **Database:** PostgreSQL 15
-- **Cache:** Redis 7
-- **Monitoring:** Prometheus + Grafana
-- **CI/CD:** GitHub Actions
-- **Infrastructure:** Docker + Docker Compose
-- **Testing:** Go testing framework with benchmarks
-
-## 🏃‍♂️ Getting Started
-### Prerequisites
-```bash
-# Install Go
-go version
-
-# Install Docker (optional for full setup)
-docker --version
-
-# Install make
-make --version
+```
+patterns/<name>/
+├── main.go              # Implementation (before & after)
+├── benchmark_test.go    # Go benchmarks with -benchmem
+└── README.md            # Analysis: problem → solution → benchmark → cost impact
 ```
 
-### **Quick Start**
+Every pattern follows the same structure:
+1. **Problem** — what's inefficient and why
+2. **Root Cause** — technical explanation
+3. **Solution** — optimized implementation
+4. **Benchmarks** — real numbers from `go test -bench`
+5. **Cost Impact** — AWS cost projection at scale (per 1M/10M/100M units)
+
+---
+
+## Quick Start
+
 ```bash
-# 1. Clone repository
-git clone https://github.com/alpardfm/cost-aware-backend.git
-cd cost-aware-backend
+git clone https://github.com/alpardfm/cost-efficient-go.git
+cd cost-efficient-go
 
-# 2. Initialize Go modules
-go mod download
-
-# 3. Start Day 1
-cd day-01
+# Run a specific pattern
+cd patterns/struct-alignment
 go run main.go
+
+# Run benchmarks
 go test -bench=. -benchmem
+
+# Detailed benchmark (3 seconds per test)
+go test -bench=. -benchmem -benchtime=3s
 ```
-
-### **Full Setup with Monitoring**
-```bash
-# Start all infrastructure (PostgreSQL, Redis, Prometheus, Grafana)
-make setup
-
-# Create today's challenge folder
-make new-day
-
-# Run daily workflow
-./scripts/daily.sh
-```
-## **📈 Monitoring Dashboard**
-
-After running `make setup`, access:
-
-- **Grafana:** [http://localhost:3000](http://localhost:3000/) (admin/admin)
-- **Prometheus:** [http://localhost:9090](http://localhost:9090/)
-- **PostgreSQL:** localhost:5432 (admin/secret)
-- **Redis:** localhost:6379
-
-## **📝 Daily Workflow**
-
-1. **Morning (15 min):** Review today's topic
-2. **Coding (1-2 hours):** Implement before/after optimizations
-3. **Measurement (30 min):** Run benchmarks, calculate cost impact
-4. **Documentation (15 min):** Update README.md with findings
-5. **Commit:** Push with clear metrics and cost analysis
-
-### **Commit Message Template**
-```text
-Day X: [Topic]
-
-## Changes
-- [Specific change 1]
-- [Specific change 2]
-
-## Performance Impact
-- Memory: Before 10MB → After 7MB (30% reduction)
-- Speed: Before 500ms → After 350ms (30% faster)
-- Queries: Before 100 → After 10 (90% reduction)
-
-## Cost Analysis
-- Database: $X/month → $Y/month (Z% savings)
-- Total estimated: $C/month savings per 100k users
-
-## Learnings
-- [Key insight 1]
-- [Key insight 2]
-```
-
-## **🧪 Testing & Benchmarking**
-
-### **Run Single Day**
-```bash
-cd day-01
-go run main.go                      # Run the demo
-go test -v                          # Run tests
-go test -bench=. -benchmem          # Run benchmarks
-go test -bench=. -benchtime=3s      # Longer benchmarks
-```
-
-### **Run All Benchmarks**
-```bash
-make benchmark-all
-```
-
-### **Performance Profiling**
-```bash
-cd day-01
-go test -bench=. -cpuprofile=cpu.prof -memprofile=mem.prof
-go tool pprof -http=:8080 cpu.prof
-go tool pprof -http=:8081 mem.prof
-```
-
-## **💰 Cost Calculation Framework**
-
-Each optimization includes cost analysis based on:
-```go
-// Example cost calculation structure
-type CostImpact struct {
-    MonthlySavings  float64
-    AnnualSavings   float64
-    Assumptions     []string
-    Calculations    string
-}
-```
-
-**Default Assumptions:**
-
-- 100,000 requests per day
-- AWS t3.medium instance: $0.0416/hour (~$30/month)
-- Data transfer: $0.09/GB
-- PostgreSQL RDS: $0.023/hour (~$17/month for db.t3.micro)
-
-## **📚 Learning Resources**
-
-### **Essential Reading**
-
-1. [Go Performance Workshop](https://github.com/davecheney/go-performance-workshop)
-2. [High Performance Go](https://github.com/dgryski/go-perfbook)
-3. [Systems Performance](http://www.brendangregg.com/systems-performance-book.html)
-
-### **Go-Specific**
-
-- [Go Blog: Profiling Go Programs](https://blog.golang.org/pprof)
-- [Go 101: Memory Layout](https://go101.org/article/memory-layout.html)
-- [Uber Go Style Guide](https://github.com/uber-go/guide)
-
-### **Database Optimization**
-
-- [Use the Index, Luke!](https://use-the-index-luke.com/)
-- [PostgreSQL EXPLAIN Visualizer](https://explain.depesz.com/)
-
-## **🤝 Contributing**
-
-This is a personal learning project, but suggestions are welcome:
-
-1. Fork the repository
-2. Create a feature branch
-3. Add your optimization case study
-4. Submit a Pull Request with benchmarks
-
-### **Adding a New Day**
-```bash
-make new-day
-cd day-XX
-# Implement your optimization
-# Add benchmarks and cost analysis
-# Update the main README.md progress tracker
-```
-
-## **📊 Success Metrics**
-
-### **Quantitative Goals**
-
-- Complete 30 daily optimizations
-- Achieve >40% average performance improvement
-- Document $1000+/year potential savings
-- Build 5 reusable optimization utilities
-
-### **Qualitative Goals**
-
-- Understand trade-offs in system design
-- Confidently analyze production performance issues
-- Make data-driven architecture decisions
-- Mentor others on performance optimization
-
-## **🚀 Production Application**
-
-After completing each day, ask:
-
-1. **Where can I apply this in my current projects?**
-2. **What metrics should I monitor to validate the impact?**
-3. **How do I communicate the business value of this optimization?**
-
-## **🔧 Available Commands**
-```bash
-make setup          # Start all infrastructure
-make new-day        # Create folder for today's challenge
-make benchmark      # Run today's benchmarks
-make benchmark-all  # Run all benchmarks
-make clean          # Clean up generated files
-make help           # Show all commands
-```
-
-## **📞 Support**
-
-- **Issues:** [GitHub Issues](https://github.com/alpardfm/cost-aware-backend/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/alpardfm/cost-aware-backend/discussions)
-- **Twitter:** [@alpardfm](https://github.com/alpardfm) (Use hashtag #CostAwareBackend)
-
-## **📝 License**
-
-MIT License - see [LICENSE](https://license/) file for details.
 
 ---
 
-## **🏆 Motivation**
+## Why This Exists
 
-> "Premature optimization is the root of all evil, but intentional optimization is the root of all savings."
-> 
+Most optimization guides tell you *what* to do. This project tells you **how much money it saves**.
 
-This challenge is about:
+Every pattern includes:
+- Real benchmark numbers (not theoretical)
+- Memory savings in bytes and percentages
+- AWS cost projection at scale
+- When to apply vs when to skip
 
-- **Learning by doing** - Not just reading theory
-- **Measuring everything** - Data-driven decisions
-- **Thinking in costs** - Engineering economics
-- **Building muscle memory** - Optimization as a habit
-
-**Start with Day 1 and commit to 30 days of intentional improvement!** 🚀
+This is engineering economics — making data-driven decisions about where optimization effort pays off.
 
 ---
 
-*Inspired by #100DaysOfCode, but focused on backend performance and cost optimization.*
+## Cost Calculation Framework
+
+Default assumptions for cost projections:
+- AWS t3.medium: ~$30/month (8GB RAM)
+- Cost per GB-month: $3.75
+- Baseline: 1M → 10M → 100M → 1B units
+
+Each pattern calculates:
+```
+Memory Before vs After → Savings per unit → Savings at scale → $/month saved
+```
+
+---
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.

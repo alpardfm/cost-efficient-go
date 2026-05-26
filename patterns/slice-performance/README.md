@@ -1,4 +1,4 @@
-# Day 2: Slice Performance & Pre-allocation
+# Slice Performance & Pre-allocation
 ## 📋 Overview
 Optimizing slice usage in Go by understanding growth patterns and using pre-allocation to reduce allocations and improve performance.
 
@@ -355,4 +355,3 @@ func putSlice(s []byte) {
 
 **Action Item:** Find at least one slice in your codebase to optimize today!
 
-**Share your results:** #CostAwareBackend #Day2 #GoOptimization

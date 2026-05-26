@@ -1,4 +1,4 @@
-# Day 1: Memory Layout & Struct Alignment
+# Memory Layout & Struct Alignment
 
 ## 📋 Overview
 
@@ -344,7 +344,7 @@ type OptimizedStruct struct {
 
 ### Follow-up Exploration
 
-1. **Day 2:** Slice vs Array performance
+1. **Slice vs Array performance** — see [slice-performance](../slice-performance/)
 2. **Investigate** how this affects JSON marshaling/unmarshaling
 3. **Explore** memory pooling techniques
 4. **Learn about** escape analysis and heap vs stack allocation
@@ -354,5 +354,3 @@ type OptimizedStruct struct {
 **🎯 Challenge Complete!** You've saved 25% memory with proper field ordering.
 
 **Memory Rule to Remember:** "Slice (24B) → String (16B) → 64-bit (8B) → 32-bit (4B) → bool (1B) last"
-
-**Share your results:** #CostAwareBackend #Day1 #GoOptimization #MemoryLayout
