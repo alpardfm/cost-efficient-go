@@ -205,7 +205,7 @@ Annual savings:      $1.464/year
 
 ### **Prerequisites**
 ```bash
-cd day-03
+cd patterns/map-internals
 ```
 
 ### **Run the Demo**

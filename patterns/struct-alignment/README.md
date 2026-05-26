@@ -173,8 +173,8 @@ Annual Savings:   $0.0876 per 1M users
 # Install Go 1.21+
 go version
 
-# Navigate to day-01
-cd day-01
+# Navigate to pattern
+cd patterns/struct-alignment
 
 ```
 

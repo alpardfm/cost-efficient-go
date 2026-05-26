@@ -176,7 +176,7 @@ Annual savings: $0.6790
 
 ### **Prerequisites**
 ```bash
-cd day-02
+cd patterns/slice-performance
 ```
 
 ### **Run the Demo**
