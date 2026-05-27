@@ -1,112 +1,228 @@
 # Cost-Efficient Go
 
-![Go](https://img.shields.io/badge/Go-1.24.4-00ADD8?style=flat-square&logo=go&logoColor=white)
+![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat-square&logo=go&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![Version](https://img.shields.io/badge/Version-v2.0.0-blue?style=flat-square)
 
-A collection of Go performance optimization patterns — each with benchmarks, memory analysis, and real AWS cost projections.
-
-Every pattern answers: **"How much money does this optimization save at scale?"**
-
----
-
-## Patterns
-
-| # | Pattern | Key Result | Link |
-|---|---------|-----------|------|
-| 1 | **Struct Alignment** | 25% memory reduction | [→](patterns/struct-alignment/) |
-| 2 | **Slice Pre-allocation** | 4x faster, 91% fewer allocations | [→](patterns/slice-performance/) |
-| 3 | **Map Internals & Overhead** | Understanding hidden memory costs | [→](patterns/map-internals/) |
-| 4 | **JSON Processing Efficiency** | 2x faster batch, 77% less bandwidth | [→](patterns/json-processing/) |
-| 5 | **Profiling & Benchmarking** | Correct measurement techniques, percentiles | [→](patterns/profiling-benchmarking/) |
-| 6 | **Connection Pooling** | 2.7x faster, 40x less memory per request | [→](patterns/connection-pooling/) |
-| 7 | **Query Optimization** | 4.4x faster SELECT, 50x faster with batch, O(1) pagination | [→](patterns/query-optimization/) |
-| 8 | **HTTP Client Optimization** | 2.6x faster with body drain, timeout protection | [→](patterns/http-client-optimization/) |
-| 9 | **Worker Pool Pattern** | Controlled concurrency, 99.9% less goroutine memory | [→](patterns/worker-pool/) |
-| 10 | **Caching Strategies** | 21,872x faster cache hit, 99% DB load reduction | [→](patterns/caching-strategies/) |
-| 11 | **Memory Pooling (sync.Pool)** | 50%+ GC reduction, 99% fewer allocations | [→](patterns/sync-pool/) |
-| 12 | **Goroutine Leak Detection** | Prevent 172-691 MB/day memory waste | [→](patterns/goroutine-leak/) |
-| 13 | **String Building Efficiency** | 5-20x faster than + operator at 100+ concats | [→](patterns/string-building/) |
-| 14 | **Interface vs Concrete Type** | ~1-3ns/call overhead; negligible for APIs | [→](patterns/interface-dispatch/) |
-| 15 | **Error Handling Efficiency** | Zero-alloc sentinel errors, 5M allocs/day eliminated | [→](patterns/error-handling/) |
-| 16 | **Context Cancellation** | 15% CPU savings at 20% cancel rate | [→](patterns/context-cancellation/) |
-| 17 | **Batch Processing** | 48x+ speedup, 99% fewer round-trips | [→](patterns/batch-processing/) |
-| 18 | **Channel Patterns** | Buffered 3-4x faster than unbuffered | [→](patterns/channel-patterns/) |
-| 19 | **Efficient Logging** | 10x+ faster than Printf, zero allocations | [→](patterns/efficient-logging/) |
-| 20 | **Redis Pipeline** | 50-100x faster, 80% latency reduction | [→](patterns/redis-pipeline/) |
+An importable Go library for detecting cost-efficiency anti-patterns in Go source code via AST-based static analysis. Each of the 20 detectors identifies a specific performance issue and returns structured findings with severity, category, explanation, and suggested fixes.
 
 ---
 
-## Each Pattern Includes
+## Installation
 
+```bash
+go get github.com/alpardfm/cost-efficient-go@v2.0.0
 ```
-patterns/<name>/
-├── main.go              # Implementation (before & after)
-├── benchmark_test.go    # Go benchmarks with -benchmem
-└── README.md            # Analysis: problem → solution → benchmark → cost impact
-```
-
-Every pattern follows the same structure:
-1. **Problem** — what's inefficient and why
-2. **Root Cause** — technical explanation
-3. **Solution** — optimized implementation
-4. **Benchmarks** — real numbers from `go test -bench`
-5. **Cost Impact** — AWS cost projection at scale (per 1M/10M/100M units)
 
 ---
 
 ## Quick Start
 
+```go
+package main
+
+import (
+    "fmt"
+    "go/ast"
+
+    "github.com/alpardfm/cost-efficient-go/registry"
+    "github.com/alpardfm/cost-efficient-go/types"
+)
+
+func main() {
+    // Get all registered detectors
+    detectors := registry.AllDetectors()
+    fmt.Printf("Loaded %d detectors\n", len(detectors))
+
+    // Look up a specific detector
+    d, ok := registry.DetectorByID("CEG-001")
+    if ok {
+        fmt.Printf("Found: %s - %s\n", d.Rule().ID, d.Rule().Name)
+    }
+
+    // Filter by category or severity
+    memoryDetectors := registry.DetectorsByCategory(types.Memory)
+    criticalDetectors := registry.DetectorsBySeverity(types.Critical)
+    fmt.Printf("Memory: %d, Critical: %d\n", len(memoryDetectors), len(criticalDetectors))
+
+    // Run detection on an AST node
+    ctx := types.ASTContext{
+        FilePath:    "example.go",
+        Line:        42,
+        Node:        &ast.Ident{Name: "example"},
+        CodeContext: `s = append(s, item)`,
+    }
+
+    for _, det := range detectors {
+        findings := det.Detect(ctx)
+        for _, f := range findings {
+            fmt.Printf("[%s] %s:%d - %s\n", f.Severity, f.FilePath, f.Line, f.Explanation)
+        }
+    }
+}
+```
+
+---
+
+## Architecture
+
+```
+github.com/alpardfm/cost-efficient-go/
+├── types/                          # Core types: Rule, Finding, ASTContext, Detector interface
+├── registry/                       # Aggregates all 20 detectors with lookup functions
+└── patterns/
+    ├── batch-processing/           # CEG-001: Batch vs sequential I/O
+    ├── caching-strategies/         # CEG-002: Cache miss detection
+    ├── channel-patterns/           # CEG-003: Unbuffered channel usage
+    ├── connection-pooling/         # CEG-004: Connection-per-request anti-pattern
+    ├── context-cancellation/       # CEG-005: Missing context cancellation
+    ├── efficient-logging/          # CEG-006: Allocating logger calls
+    ├── error-handling/             # CEG-007: Inefficient error patterns
+    ├── goroutine-leak/             # CEG-008: Leaked goroutines
+    ├── http-client-optimization/   # CEG-009: HTTP client misuse
+    ├── interface-dispatch/         # CEG-010: Interface overhead awareness
+    ├── json-processing/            # CEG-011: Inefficient JSON handling
+    ├── map-internals/              # CEG-012: Map memory overhead
+    ├── profiling-benchmarking/     # CEG-013: Measurement anti-patterns
+    ├── query-optimization/         # CEG-014: N+1 queries, missing indexes
+    ├── redis-pipeline/             # CEG-015: Non-pipelined Redis calls
+    ├── slice-performance/          # CEG-016: Slice growth without pre-allocation
+    ├── string-building/            # CEG-017: String concatenation with +
+    ├── struct-alignment/           # CEG-018: Struct padding waste
+    ├── sync-pool/                  # CEG-019: Missing object pooling
+    └── worker-pool/                # CEG-020: Unbounded goroutine spawning
+```
+
+---
+
+## API Reference
+
+### types package
+
+```go
+import "github.com/alpardfm/cost-efficient-go/types"
+```
+
+| Type | Description |
+|------|-------------|
+| `Detector` | Interface with `Detect(ctx ASTContext) []Finding` and `Rule() Rule` |
+| `ASTContext` | Input struct: FilePath, Line, Node (ast.Node), CodeContext |
+| `Finding` | Output struct: RuleID, FilePath, Line, Explanation, SuggestedFix, Severity, Category, CodeContext |
+| `Rule` | Metadata: ID, Name, Description, Severity, Category, Suggestion, ReferenceLinks |
+| `Severity` | Constants: `Minor`, `Major`, `Critical` |
+| `Category` | Constants: `Memory`, `Concurrency`, `IO`, `ErrorHandling` |
+
+### registry package
+
+```go
+import "github.com/alpardfm/cost-efficient-go/registry"
+```
+
+| Function | Description |
+|----------|-------------|
+| `AllDetectors() []types.Detector` | Returns all 20 registered detectors |
+| `DetectorByID(id string) (types.Detector, bool)` | Lookup by rule ID (e.g. "CEG-001") |
+| `DetectorsByCategory(cat types.Category) []types.Detector` | Filter by category |
+| `DetectorsBySeverity(sev types.Severity) []types.Detector` | Filter by severity |
+
+All registry functions are safe for concurrent use.
+
+---
+
+## Detectors
+
+| ID | Pattern | Category | Severity |
+|----|---------|----------|----------|
+| CEG-001 | Batch Processing | IO | Major |
+| CEG-002 | Caching Strategies | Memory | Major |
+| CEG-003 | Channel Patterns | Concurrency | Minor |
+| CEG-004 | Connection Pooling | IO | Critical |
+| CEG-005 | Context Cancellation | Concurrency | Critical |
+| CEG-006 | Efficient Logging | Memory | Minor |
+| CEG-007 | Error Handling | ErrorHandling | Major |
+| CEG-008 | Goroutine Leak | Concurrency | Critical |
+| CEG-009 | HTTP Client Optimization | IO | Major |
+| CEG-010 | Interface Dispatch | Memory | Minor |
+| CEG-011 | JSON Processing | Memory | Major |
+| CEG-012 | Map Internals | Memory | Minor |
+| CEG-013 | Profiling & Benchmarking | Memory | Minor |
+| CEG-014 | Query Optimization | IO | Critical |
+| CEG-015 | Redis Pipeline | IO | Major |
+| CEG-016 | Slice Performance | Memory | Major |
+| CEG-017 | String Building | Memory | Major |
+| CEG-018 | Struct Alignment | Memory | Minor |
+| CEG-019 | Sync Pool | Memory | Major |
+| CEG-020 | Worker Pool | Concurrency | Major |
+
+---
+
+## Design Principles
+
+- **Stateless detectors** — each `Detect` call is a pure function of its input, inherently safe for concurrent use
+- **No file I/O** — detectors receive pre-parsed AST context; the consuming analyzer handles parsing
+- **No panics** — detectors handle nil nodes and unexpected AST structures gracefully
+- **Immutable registry** — all detectors register at init time; the registry is read-only after startup
+
+---
+
+## Using Individual Patterns
+
+You can import specific pattern packages directly:
+
+```go
+import (
+    "github.com/alpardfm/cost-efficient-go/patterns/batch-processing"
+    "github.com/alpardfm/cost-efficient-go/types"
+)
+
+func main() {
+    detector := batch_processing.NewDetector()
+    findings := detector.Detect(ctx)
+}
+```
+
+---
+
+## Examples
+
+Each pattern includes educational example code in its `examples/` subdirectory:
+
 ```bash
-git clone https://github.com/alpardfm/cost-efficient-go.git
-cd cost-efficient-go
+# Run a specific pattern's example
+go run ./patterns/struct-alignment/examples/
 
-# Run all benchmarks
-make bench-all
-
-# Run specific pattern benchmark
-make bench-sync-pool
-
-# Run all tests
-make test
-
-# Run a specific pattern
-cd patterns/struct-alignment
-go run main.go
-
-# Run benchmarks
-go test -bench=. -benchmem
-
-# Detailed benchmark (3 seconds per test)
-go test -bench=. -benchmem -benchtime=3s
+# Run benchmarks for a pattern
+go test -bench=. -benchmem ./patterns/slice-performance/
 ```
 
 ---
 
-## Why This Exists
+## Running Tests
 
-Most optimization guides tell you *what* to do. This project tells you **how much money it saves**.
+```bash
+# All tests
+go test ./...
 
-Every pattern includes:
-- Real benchmark numbers (not theoretical)
-- Memory savings in bytes and percentages
-- AWS cost projection at scale
-- When to apply vs when to skip
+# With race detector
+go test -race ./...
 
-This is engineering economics — making data-driven decisions about where optimization effort pays off.
+# Benchmarks
+go test -bench=. -benchmem ./...
+
+# Property-based tests only
+go test -run TestProperty ./registry/
+```
 
 ---
 
-## Cost Calculation Framework
+## Versioning
 
-Default assumptions for cost projections:
-- AWS t3.medium: ~$30/month (8GB RAM)
-- Cost per GB-month: $3.75
-- Baseline: 1M → 10M → 100M → 1B units
+- **v1.0.0** — Educational repository (20 patterns as standalone `package main` programs)
+- **v2.0.0** — Importable library with Detector interface, registry, and structured types
 
-Each pattern calculates:
-```
-Memory Before vs After → Savings per unit → Savings at scale → $/month saved
-```
+ID allocation:
+- `CEG-001` to `CEG-099`: Reserved for core patterns
+- `CEG-1000+`: Designated for custom/external detectors
 
 ---
 
