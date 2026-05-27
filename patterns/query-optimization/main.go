@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 	"strings"
 	"time"
 )
@@ -111,6 +112,19 @@ func SimulateNPlusOne(userIDs []int, ordersByUser map[int][]Order) [][]Order {
 	return result
 }
 
+// SimulateNPlusOneWithLatency fetches orders one user at a time with simulated network round-trip.
+// Each query incurs a network round-trip (time.Sleep), making N+1 realistically expensive.
+func SimulateNPlusOneWithLatency(userIDs []int, ordersByUser map[int][]Order, latency time.Duration) [][]Order {
+	result := make([][]Order, len(userIDs))
+	for i, uid := range userIDs {
+		// Simulates: network round-trip per query
+		time.Sleep(latency)
+		// Simulates: SELECT * FROM orders WHERE user_id = ?
+		result[i] = ordersByUser[uid]
+	}
+	return result
+}
+
 // SimulateBatchQuery fetches all orders in one query (WHERE user_id IN (...))
 func SimulateBatchQuery(userIDs []int, ordersByUser map[int][]Order) map[int][]Order {
 	// Simulates: SELECT * FROM orders WHERE user_id IN (?, ?, ?, ...)
@@ -123,29 +137,58 @@ func SimulateBatchQuery(userIDs []int, ordersByUser map[int][]Order) map[int][]O
 	return result
 }
 
+// SimulateBatchQueryWithLatency fetches all orders in one query with simulated network round-trip.
+// Only one round-trip is needed regardless of how many user IDs are queried.
+func SimulateBatchQueryWithLatency(userIDs []int, ordersByUser map[int][]Order, latency time.Duration) map[int][]Order {
+	// Simulates: single network round-trip for batch query
+	time.Sleep(latency)
+	// Simulates: SELECT * FROM orders WHERE user_id IN (?, ?, ?, ...)
+	result := make(map[int][]Order, len(userIDs))
+	for _, uid := range userIDs {
+		if orders, ok := ordersByUser[uid]; ok {
+			result[uid] = orders
+		}
+	}
+	return result
+}
+
 // SimulateOffsetPagination uses OFFSET (slow for deep pages)
+// In real PostgreSQL, OFFSET must sequentially scan and discard rows,
+// making it O(n) where n is the offset value.
 func SimulateOffsetPagination(data []User, page, pageSize int) []User {
 	offset := (page - 1) * pageSize
 	if offset >= len(data) {
 		return nil
 	}
-	end := offset + pageSize
-	if end > len(data) {
-		end = len(data)
-	}
-	// In real DB: must scan and discard `offset` rows first
-	return data[offset:end]
-}
-
-// SimulateKeysetPagination uses WHERE id > lastID (fast for any page)
-func SimulateKeysetPagination(data []User, lastID, pageSize int) []User {
-	// In real DB: uses index to jump directly to lastID
+	// Simulate real DB behavior: must scan through all rows up to offset
+	// PostgreSQL cannot skip rows — it must read and discard them sequentially
+	found := 0
 	start := 0
-	for i, u := range data {
-		if u.ID > lastID {
+	for i := range data {
+		if found == offset {
 			start = i
 			break
 		}
+		found++
+	}
+	end := start + pageSize
+	if end > len(data) {
+		end = len(data)
+	}
+	return data[start:end]
+}
+
+// SimulateKeysetPagination uses WHERE id > lastID (fast for any page)
+// Uses binary search (sort.Search) to simulate B-tree index lookup O(log n),
+// which is how PostgreSQL actually executes keyset pagination via index seek.
+func SimulateKeysetPagination(data []User, lastID, pageSize int) []User {
+	// Binary search: simulates B-tree index seek in PostgreSQL
+	// In real DB: WHERE id > lastID uses index to jump directly (O(log n))
+	start := sort.Search(len(data), func(i int) bool {
+		return data[i].ID > lastID
+	})
+	if start >= len(data) {
+		return nil
 	}
 	end := start + pageSize
 	if end > len(data) {
@@ -239,24 +282,22 @@ func main() {
 	_ = allUsers
 	_ = summaries
 
-	// 2. N+1 vs Batch
+	// 2. N+1 vs Batch (with simulated network latency)
 	fmt.Println("--- N+1 vs Batch Query (100 users, 5 orders each) ---")
-	start = time.Now()
-	for range 1000 {
-		SimulateNPlusOne(userIDs, ordersByUser)
-	}
-	nplusDuration := time.Since(start) / 1000
+	networkLatency := 1 * time.Millisecond // Simulated network round-trip
 
 	start = time.Now()
-	for range 1000 {
-		SimulateBatchQuery(userIDs, ordersByUser)
-	}
-	batchDuration := time.Since(start) / 1000
+	SimulateNPlusOneWithLatency(userIDs, ordersByUser, networkLatency)
+	nplusDuration := time.Since(start)
 
-	fmt.Printf("N+1 (100 queries):  %v\n", nplusDuration)
-	fmt.Printf("Batch (1 query):    %v\n", batchDuration)
-	fmt.Printf("In real DB: N+1 = 100 round trips × ~1ms = ~100ms\n")
-	fmt.Printf("In real DB: Batch = 1 round trip × ~2ms = ~2ms (50x faster)\n")
+	start = time.Now()
+	SimulateBatchQueryWithLatency(userIDs, ordersByUser, 2*networkLatency) // Batch query slightly heavier but only 1 round-trip
+	batchDuration := time.Since(start)
+
+	fmt.Printf("N+1 (100 queries × 1ms latency):  %v\n", nplusDuration)
+	fmt.Printf("Batch (1 query × 2ms latency):    %v\n", batchDuration)
+	fmt.Printf("Speedup: %.1fx faster with batch\n", float64(nplusDuration)/float64(batchDuration))
+	fmt.Printf("Explanation: N+1 = 100 round trips × 1ms = ~100ms, Batch = 1 round trip × 2ms = ~2ms\n")
 	fmt.Println()
 
 	// 3. Offset vs Keyset pagination
@@ -274,8 +315,8 @@ func main() {
 	keysetDuration := time.Since(start) / 10000
 
 	fmt.Printf("OFFSET %d LIMIT 20:        %v (must skip %d rows)\n", 499*20, offsetDuration, 499*20)
-	fmt.Printf("WHERE id > 9980 LIMIT 20:  %v (index seek)\n", keysetDuration)
-	fmt.Printf("In real DB: OFFSET scales O(n), keyset is O(1) via index\n")
+	fmt.Printf("WHERE id > 9980 LIMIT 20:  %v (binary search index seek)\n", keysetDuration)
+	fmt.Printf("In real DB: OFFSET scales O(n), keyset is O(log n) via B-tree index\n")
 	fmt.Println()
 
 	// 4. IN clause building

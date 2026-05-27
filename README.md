@@ -1,6 +1,6 @@
 # Cost-Efficient Go
 
-![Go](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go&logoColor=white)
+![Go](https://img.shields.io/badge/Go-1.24.4-00ADD8?style=flat-square&logo=go&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 A collection of Go performance optimization patterns — each with benchmarks, memory analysis, and real AWS cost projections.
@@ -23,6 +23,16 @@ Every pattern answers: **"How much money does this optimization save at scale?"*
 | 8 | **HTTP Client Optimization** | 2.6x faster with body drain, timeout protection | [→](patterns/http-client-optimization/) |
 | 9 | **Worker Pool Pattern** | Controlled concurrency, 99.9% less goroutine memory | [→](patterns/worker-pool/) |
 | 10 | **Caching Strategies** | 21,872x faster cache hit, 99% DB load reduction | [→](patterns/caching-strategies/) |
+| 11 | **Memory Pooling (sync.Pool)** | 50%+ GC reduction, 99% fewer allocations | [→](patterns/sync-pool/) |
+| 12 | **Goroutine Leak Detection** | Prevent 172-691 MB/day memory waste | [→](patterns/goroutine-leak/) |
+| 13 | **String Building Efficiency** | 5-20x faster than + operator at 100+ concats | [→](patterns/string-building/) |
+| 14 | **Interface vs Concrete Type** | ~1-3ns/call overhead; negligible for APIs | [→](patterns/interface-dispatch/) |
+| 15 | **Error Handling Efficiency** | Zero-alloc sentinel errors, 5M allocs/day eliminated | [→](patterns/error-handling/) |
+| 16 | **Context Cancellation** | 15% CPU savings at 20% cancel rate | [→](patterns/context-cancellation/) |
+| 17 | **Batch Processing** | 48x+ speedup, 99% fewer round-trips | [→](patterns/batch-processing/) |
+| 18 | **Channel Patterns** | Buffered 3-4x faster than unbuffered | [→](patterns/channel-patterns/) |
+| 19 | **Efficient Logging** | 10x+ faster than Printf, zero allocations | [→](patterns/efficient-logging/) |
+| 20 | **Redis Pipeline** | 50-100x faster, 80% latency reduction | [→](patterns/redis-pipeline/) |
 
 ---
 
@@ -49,6 +59,15 @@ Every pattern follows the same structure:
 ```bash
 git clone https://github.com/alpardfm/cost-efficient-go.git
 cd cost-efficient-go
+
+# Run all benchmarks
+make bench-all
+
+# Run specific pattern benchmark
+make bench-sync-pool
+
+# Run all tests
+make test
 
 # Run a specific pattern
 cd patterns/struct-alignment

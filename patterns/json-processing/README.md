@@ -4,6 +4,11 @@
 
 Optimizing JSON serialization in Go by leveraging `omitempty`, typed structs over maps, and understanding the hidden costs of `encoding/json` reflection.
 
+## TL;DR
+- **Problem**: `map[string]interface{}` forces runtime type inspection and `encoding/json` serializes empty fields wastefully
+- **Solution**: Use typed structs with `omitempty` tags and pointer fields for optional nested objects
+- **Impact**: 2x faster marshaling, 77% less bandwidth, 2500x fewer allocations at batch scale (1000 items)
+
 ## 🎯 Problem Statement
 
 Go's `encoding/json` uses reflection for every marshal/unmarshal call. Poor struct design amplifies this cost:
@@ -193,3 +198,63 @@ go test -bench=. -benchmem -benchtime=3s
 - Data is genuinely dynamic/unknown at compile time
 - You're prototyping and schema is unstable
 - The endpoint handles <100 requests/day (optimization won't matter)
+
+## 🚀 Beyond stdlib
+
+The optimizations above stay within `encoding/json`. If you need more speed and are willing to take on a third-party dependency, these libraries offer significant improvements:
+
+### Alternative Libraries
+
+| Library | Speedup vs `encoding/json` | Drop-in? | Notes |
+|---------|---------------------------|----------|-------|
+| [json-iterator/go](https://github.com/json-iterator/go) | ~2-3x faster | ✅ Yes | API-compatible, uses code generation internally |
+| [goccy/go-json](https://github.com/goccy/go-json) | ~3-5x faster | ✅ Yes | Zero-reflection approach, struct tag compatible |
+| [bytedance/sonic](https://github.com/bytedance/sonic) | ~5-10x faster | ⚠️ Partial | SIMD-based (requires amd64/linux), JIT compilation |
+
+### Approximate Benchmark Comparison
+
+Based on numbers from each library's README (marshaling a medium-complexity struct):
+
+```
+encoding/json:    ~2,000 ns/op    ~400 B/op
+json-iterator:    ~800 ns/op      ~200 B/op     (2.5x faster)
+go-json:          ~500 ns/op      ~150 B/op     (4x faster)
+sonic:            ~250 ns/op      ~100 B/op     (8x faster, amd64 only)
+```
+
+### Trade-offs
+
+| Concern | json-iterator | go-json | sonic |
+|---------|--------------|---------|-------|
+| **Compatibility** | Full `encoding/json` API | Full API compat | Partial — some edge cases differ |
+| **Platform support** | All platforms | All platforms | amd64 Linux/macOS only |
+| **Maintenance** | Active, widely used | Active | Active (ByteDance backed) |
+| **Binary size** | Minimal increase | Minimal increase | Larger (JIT + SIMD code) |
+| **Go version** | 1.12+ | 1.18+ | 1.17+ (with constraints) |
+
+### When to Consider
+
+✅ **Switch when:**
+- JSON processing is a measured bottleneck (profiling confirms >10% CPU in `encoding/json`)
+- You're processing high-volume API responses (>10K req/sec)
+- Batch jobs spend significant time in marshal/unmarshal
+
+❌ **Stay with stdlib when:**
+- JSON is not in your hot path
+- You need guaranteed long-term stability (stdlib won't break between Go versions)
+- You target non-amd64 platforms and want sonic-level speed
+- Your team prefers zero external dependencies
+
+### Quick Migration (json-iterator)
+
+```go
+import jsoniter "github.com/json-iterator/go"
+
+// Drop-in replacement — same API as encoding/json
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+data, err := json.Marshal(myStruct)
+err = json.Unmarshal(data, &result)
+```
+
+> **Recommendation:** Start with struct optimization + `omitempty` (this pattern). Only reach for alternative libraries after profiling confirms `encoding/json` is your bottleneck. The stdlib optimizations give you 2-4x improvement with zero dependencies.

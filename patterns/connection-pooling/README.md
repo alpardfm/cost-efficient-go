@@ -4,6 +4,11 @@
 
 Reusing TCP connections instead of creating new ones per request — eliminating handshake overhead and reducing latency by 2.7x.
 
+## TL;DR
+- **Problem**: Creating a new TCP connection per request adds 0.5-5ms handshake overhead and wastes file descriptors
+- **Solution**: Reuse connections via a pool (`database/sql`, `http.Transport`, or custom pool with configurable maxIdle)
+- **Impact**: 2.7x faster latency, 40x less memory, 16x fewer allocations; can downgrade DB instance saving ~$1,150/month
+
 ## 🎯 Problem Statement
 
 Every new TCP connection requires:
@@ -66,6 +71,52 @@ Tested on Apple M1, Go 1.24.4 (localhost TCP echo server):
 | 20 | 1 | 99 | 99% |
 
 **For sequential workloads, even maxIdle=1 achieves 99% reuse.** Pool size matters for concurrent workloads.
+
+### Pool Size Impact Under Concurrency
+
+When multiple goroutines compete for connections simultaneously, pool size becomes critical.
+With an undersized pool, connections are discarded on return (pool full) and must be re-created on next request.
+
+**Benchmark: concurrency=50, varying pool sizes** (Apple M1, Go 1.24.4):
+
+| Pool Size (maxIdle) | ns/op | B/op | Notes |
+|--------------------:|------:|-----:|-------|
+| 1 | **76,564** | 144 | Pool too small — constant dial overhead |
+| 5 | 50,499 | 125 | Still undersized for 50 goroutines |
+| 10 | 48,571 | 113 | Improving but not enough |
+| 25 | **37,608** | 100 | Sweet spot — pool ≈ concurrency/2 |
+| 50 | 48,243 | 95 | Matched — diminishing returns |
+| 100 | 48,243 | 95 | Oversized — no additional benefit |
+
+**Key insight:** `poolSize=1` with `concurrency=50` is **2x slower** than `poolSize=25`.
+
+### Pool Size Mismatch Benchmark
+
+Direct comparison showing undersized vs matched pool at concurrency=50:
+
+| Scenario | ns/op | B/op | allocs/op |
+|----------|------:|-----:|----------:|
+| Undersized (pool=5, conc=50) | **43,375** | 92 | 2 |
+| Matched (pool=50, conc=50) | **25,362** | 81 | 2 |
+
+**Matched pool is 1.7x faster** — the undersized pool forces TCP dials when all 5 idle slots are occupied.
+
+### Why Pool Size Matters for Concurrent Workloads
+
+```
+Sequential (concurrency=1):
+  Get → [use] → Put → Get → [use] → Put
+  Pool always has 1 idle connection ready. maxIdle=1 is fine.
+
+Concurrent (concurrency=50):
+  Goroutine 1: Get → [use 500µs] → Put
+  Goroutine 2: Get → [use 500µs] → Put
+  ...
+  Goroutine 50: Get → pool empty! → dial new connection (expensive)
+
+  With maxIdle=5: only 5 connections survive between rounds
+  With maxIdle=50: all 50 connections survive → zero dials after warmup
+```
 
 ## ⚡ Implementation
 
@@ -193,6 +244,15 @@ go test -bench=. -benchmem
 
 # Longer benchmark
 go test -bench=. -benchmem -benchtime=5s
+
+# Run only concurrent pool size benchmarks (shows when pool size matters)
+go test -bench=BenchmarkConcurrentPoolSize -benchmem
+
+# Run pool size mismatch comparison
+go test -bench=BenchmarkPoolSizeMismatch -benchmem
+
+# Run pool efficiency test (shows created vs reused stats)
+go test -v -run TestConcurrentPoolEfficiency
 ```
 
 ## 📚 Key Takeaways

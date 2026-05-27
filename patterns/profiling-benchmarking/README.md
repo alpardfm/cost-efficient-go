@@ -4,6 +4,11 @@
 
 How to measure Go performance correctly — avoiding common pitfalls like compiler elimination, cold-start bias, and misleading averages.
 
+## TL;DR
+- **Problem**: Incorrect benchmarks (dead code elimination, no warm-up, wrong scale) lead to wrong optimization decisions
+- **Solution**: Use package-level sinks, measure percentiles (P50/P95/P99), warm up, and test at production scale
+- **Impact**: Accurate measurements prevent wasted effort — e.g., sorting 10K items takes 1.5ms (not "fast enough"), revealing need for caching
+
 ## 🎯 Problem Statement
 
 Most developers benchmark incorrectly:

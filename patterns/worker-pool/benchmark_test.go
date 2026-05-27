@@ -112,3 +112,76 @@ func BenchmarkPool64Workers1000IO(b *testing.B) {
 		ProcessWithPool(tasks, 64)
 	}
 }
+
+// ============================================================
+// Benchmarks: errgroup.SetLimit() comparison
+// ============================================================
+
+// --- CPU-bound: errgroup vs custom pool ---
+
+func BenchmarkErrgroup8Workers100CPUOnly(b *testing.B) {
+	tasks := generateTasks(100, 0)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ProcessWithErrgroup(tasks, 8)
+	}
+}
+
+func BenchmarkErrgroup16Workers100CPUOnly(b *testing.B) {
+	tasks := generateTasks(100, 0)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ProcessWithErrgroup(tasks, 16)
+	}
+}
+
+// --- I/O-bound: errgroup vs custom pool ---
+
+func BenchmarkErrgroup8Workers100IO(b *testing.B) {
+	tasks := generateTasks(100, 1*time.Millisecond)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ProcessWithErrgroup(tasks, 8)
+	}
+}
+
+func BenchmarkErrgroup16Workers100IO(b *testing.B) {
+	tasks := generateTasks(100, 1*time.Millisecond)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ProcessWithErrgroup(tasks, 16)
+	}
+}
+
+func BenchmarkErrgroup32Workers100IO(b *testing.B) {
+	tasks := generateTasks(100, 1*time.Millisecond)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ProcessWithErrgroup(tasks, 32)
+	}
+}
+
+// --- Scale: 1000 tasks with errgroup ---
+
+func BenchmarkErrgroup32Workers1000IO(b *testing.B) {
+	tasks := generateTasks(1000, 1*time.Millisecond)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ProcessWithErrgroup(tasks, 32)
+	}
+}
+
+func BenchmarkErrgroup64Workers1000IO(b *testing.B) {
+	tasks := generateTasks(1000, 1*time.Millisecond)
+	b.ResetTimer()
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		ProcessWithErrgroup(tasks, 64)
+	}
+}

@@ -4,6 +4,11 @@
 
 Configuring Go's HTTP client for production — proper timeouts, connection reuse, body handling, and context cancellation.
 
+## TL;DR
+- **Problem**: Default `http.Client` has no timeout, leaks connections when body isn't drained, and creates new clients per request
+- **Solution**: Share one client with configured Transport, always drain+close body, use context for cancellation
+- **Impact**: 2.6x faster with body drain, 18% faster with shared client, prevents goroutine leaks and OOM crashes
+
 ## 🎯 Problem Statement
 
 Go's default `http.Client` is not production-ready:
