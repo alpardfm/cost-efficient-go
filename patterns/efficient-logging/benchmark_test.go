@@ -1,4 +1,4 @@
-package main
+package efficient_logging
 
 import (
 	"io"

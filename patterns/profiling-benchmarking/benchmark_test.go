@@ -1,4 +1,4 @@
-package main
+package profiling_benchmarking
 
 import (
 	"math/rand"

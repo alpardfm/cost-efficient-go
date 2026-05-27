@@ -1,4 +1,4 @@
-package main
+package channel_patterns
 
 import (
 	"fmt"

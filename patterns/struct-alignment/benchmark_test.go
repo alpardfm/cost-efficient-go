@@ -1,4 +1,4 @@
-package main
+package struct_alignment
 
 import (
 	"testing"

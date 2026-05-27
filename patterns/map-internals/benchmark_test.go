@@ -1,4 +1,4 @@
-package main
+package map_internals_test
 
 import (
 	"fmt"

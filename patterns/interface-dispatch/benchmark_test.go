@@ -1,4 +1,4 @@
-package main
+package interface_dispatch
 
 import (
 	"testing"

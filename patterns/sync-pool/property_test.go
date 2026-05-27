@@ -1,7 +1,6 @@
-package main
+package sync_pool
 
 import (
-	"runtime"
 	"testing"
 
 	"github.com/leanovate/gopter"
@@ -15,6 +14,10 @@ func TestProperty_PoolReuseNeverAllocatesMoreThanFresh(t *testing.T) {
 	parameters.MinSuccessfulTests = 100
 	properties := gopter.NewProperties(parameters)
 
+	// Note (Req 9.3): Switched from runtime.MemStats to testing.AllocsPerRun
+	// because MemStats is unreliable under the race detector and GC timing
+	// variations. The property being tested is the same: pooled allocation
+	// should use fewer or equal heap allocations than naive allocation.
 	properties.Property("pooled allocation has fewer or equal allocs than naive", prop.ForAll(
 		func(size int) bool {
 			pool := NewBufferPool(size)
@@ -23,24 +26,15 @@ func TestProperty_PoolReuseNeverAllocatesMoreThanFresh(t *testing.T) {
 			buf := pool.Get()
 			pool.Put(buf)
 
-			// Measure naive allocation
-			runtime.GC()
-			var memBefore, memAfter runtime.MemStats
-			runtime.ReadMemStats(&memBefore)
-			for i := 0; i < 10; i++ {
-				globalSink = NaiveBufferAlloc(size)
-			}
-			runtime.ReadMemStats(&memAfter)
-			naiveAllocs := memAfter.Mallocs - memBefore.Mallocs
+			// Measure naive allocation count
+			naiveAllocs := testing.AllocsPerRun(10, func() {
+				GlobalSink = NaiveBufferAlloc(size)
+			})
 
-			// Measure pooled allocation
-			runtime.GC()
-			runtime.ReadMemStats(&memBefore)
-			for i := 0; i < 10; i++ {
-				globalSink = PooledBufferAlloc(pool)
-			}
-			runtime.ReadMemStats(&memAfter)
-			pooledAllocs := memAfter.Mallocs - memBefore.Mallocs
+			// Measure pooled allocation count
+			pooledAllocs := testing.AllocsPerRun(10, func() {
+				GlobalSink = PooledBufferAlloc(pool)
+			})
 
 			return pooledAllocs <= naiveAllocs
 		},

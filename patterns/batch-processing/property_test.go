@@ -1,4 +1,4 @@
-package main
+package batch_processing
 
 import (
 	"testing"

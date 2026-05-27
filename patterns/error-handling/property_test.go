@@ -1,4 +1,4 @@
-package main
+package error_handling
 
 import (
 	"testing"
