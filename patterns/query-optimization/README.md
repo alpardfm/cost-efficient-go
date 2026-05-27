@@ -4,6 +4,11 @@
 
 Optimizing database query patterns in Go — SELECT specific columns, batch queries, and efficient pagination to reduce latency and cost.
 
+## TL;DR
+- **Problem**: SELECT *, N+1 queries, and OFFSET pagination cause excessive memory, round-trips, and full table scans
+- **Solution**: SELECT specific columns, batch with IN clause, use keyset (WHERE id > cursor) pagination
+- **Impact**: 4.4x faster SELECT, 50x faster batch vs N+1 (real DB), O(1) pagination for deep pages
+
 ## 🎯 Problem Statement
 
 The three most common query anti-patterns in backend APIs:

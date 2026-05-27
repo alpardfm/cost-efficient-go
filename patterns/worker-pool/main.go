@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"runtime"
 	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // ============================================================
@@ -122,6 +125,31 @@ func ProcessWithPool(tasks []Task, workers int) []int {
 	return pool.Wait()
 }
 
+// --- errgroup.SetLimit (Idiomatic Alternative) ---
+
+// ProcessWithErrgroup processes tasks using errgroup with SetLimit.
+// This is the idiomatic Go approach for bounded concurrency when:
+// - Tasks are independent and don't need backpressure
+// - You want simple error propagation
+// - The pool is short-lived (process a batch, then done)
+func ProcessWithErrgroup(tasks []Task, workers int) []int {
+	results := make([]int, len(tasks))
+
+	g, _ := errgroup.WithContext(context.Background())
+	g.SetLimit(workers)
+
+	for i, task := range tasks {
+		i, task := i, task // capture loop variables
+		g.Go(func() error {
+			results[i] = ProcessTask(task)
+			return nil
+		})
+	}
+
+	_ = g.Wait()
+	return results
+}
+
 // --- Demonstration ---
 
 func main() {
@@ -163,7 +191,17 @@ func main() {
 	}
 	fmt.Println()
 
-	// 3. Goroutine count comparison
+	// 3. errgroup.SetLimit comparison
+	fmt.Println("--- errgroup.SetLimit (1000 tasks, varying workers) ---")
+	for _, workers := range []int{4, 8, 16, 32, 64} {
+		start := time.Now()
+		ProcessWithErrgroup(tasks, workers)
+		duration := time.Since(start)
+		fmt.Printf("  limit=%2d → %v\n", workers, duration)
+	}
+	fmt.Println()
+
+	// 4. Goroutine count comparison
 	fmt.Println("--- Peak Goroutine Count ---")
 	fmt.Printf("  Unbounded: %d goroutines (1 per task)\n", len(tasks))
 	fmt.Printf("  Pool(16):  %d goroutines (fixed)\n", 16)

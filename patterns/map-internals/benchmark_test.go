@@ -243,7 +243,7 @@ func Test_MapMemoryOverhead(t *testing.T) {
 
 		t.Logf("Size %6d: Map pointer=%4d bytes, Slice=%6d bytes",
 			size, mapSize, sliceSize)
-		t.Logf("          Note: Real map overhead is ~50 bytes per entry!")
+		t.Logf("          Note: Real map overhead is ~24 bytes per entry above key+value data!")
 	}
 }
 

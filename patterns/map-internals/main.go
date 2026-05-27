@@ -92,7 +92,7 @@ func measureMapMemory() {
 	fmt.Printf("Map with 1000 int→string entries:\n")
 	fmt.Printf("  Actual memory:   %8d bytes\n", mapMemory)
 	fmt.Printf("  Expected (naive):%8d bytes\n", expectedMemory)
-	fmt.Printf("  Overhead:        %8d bytes (%.1fx!)\n",
+	fmt.Printf("  Overhead:        %8.0f bytes (%.1fx!)\n",
 		float64(mapMemory)-float64(expectedMemory),
 		float64(mapMemory)/float64(expectedMemory))
 
@@ -161,7 +161,8 @@ func runComparisonBenchmarks() {
 
 	// Memory comparison
 	fmt.Println("\n💾 Memory efficiency (lower is better):")
-	fmt.Printf("  Map overhead per entry:    ~50 bytes\n")
+	fmt.Printf("  Map overhead per entry:    ~24 bytes (on top of key+value data)\n")
+	fmt.Printf("  Total per entry:           ~48 bytes (for map[int]string)\n")
 	fmt.Printf("  Slice of structs overhead: ~0 bytes (exact size)\n")
 	fmt.Printf("  Memory ratio: Map uses ~3-10x more memory!\n")
 }
@@ -171,11 +172,12 @@ func explainMapInternals() {
 	fmt.Println()
 
 	fmt.Println("map[int]string memory layout per entry:")
-	fmt.Println("┌────────────┬────────────┬────────────┬────────────┐")
-	fmt.Println("│   Key (8)  │  Value(16) │ Next*(8)   │  Overflow  │")
-	fmt.Println("│            │            │            │   header   │")
-	fmt.Println("└────────────┴────────────┴────────────┴────────────┘")
-	fmt.Println("  Total: ~40-50 bytes per entry (excluding strings)")
+	fmt.Println("┌────────────┬────────────┬──────────────────────────────┐")
+	fmt.Println("│   Key (8)  │  Value(16) │  Overhead (~24 bytes)        │")
+	fmt.Println("│   (data)   │   (data)   │  tophash + bucket padding    │")
+	fmt.Println("│            │            │  + overflow ptr share        │")
+	fmt.Println("└────────────┴────────────┴──────────────────────────────┘")
+	fmt.Println("  Total: ~48 bytes per entry (24 bytes data + ~24 bytes overhead)")
 	fmt.Println()
 
 	fmt.Println("📈 MAP GROWTH PATTERN:")
@@ -221,7 +223,7 @@ func analyzeRealWorldScenarios() {
 	fmt.Println()
 
 	fmt.Println("Option A: map[int]string")
-	fmt.Println("  • Memory: ~50MB (50 bytes × 1M)")
+	fmt.Println("  • Memory: ~48MB (~48 bytes × 1M, includes ~24 bytes overhead/entry)")
 	fmt.Println("  • Lookup: O(1), fast")
 	fmt.Println("  • Iteration: slow, random order")
 	fmt.Println()
@@ -271,16 +273,17 @@ func calculateMapCostImpact() {
 	fmt.Println("📈 MAP OVERHEAD CALCULATION:")
 
 	// Constants
-	mapEntryOverhead := 50.0   // bytes per map entry
-	sliceEntryOverhead := 16.0 // bytes per slice entry (int + string)
+	mapEntryTotal := 48.0      // bytes per map entry (key + value + overhead)
+	sliceEntryOverhead := 16.0 // bytes per slice entry (int + string header)
 	entries := 1_000_000.0     // 1 million entries
 	awsCostPerGBMonth := 3.75  // $/GB-month
 
 	fmt.Printf("Scenario: Storing 1M user ID → name mappings\n")
-	fmt.Printf("Each entry: int key + string value (~16 bytes data)\n\n")
+	fmt.Printf("Each entry: int key (8B) + string value (16B) = 24 bytes data\n")
+	fmt.Printf("Map overhead per entry: ~24 bytes (tophash, bucket padding, overflow ptr)\n\n")
 
 	// Map memory
-	mapMemoryGB := (entries * mapEntryOverhead) / (1024 * 1024 * 1024)
+	mapMemoryGB := (entries * mapEntryTotal) / (1024 * 1024 * 1024)
 	mapCost := mapMemoryGB * awsCostPerGBMonth
 
 	// Slice memory

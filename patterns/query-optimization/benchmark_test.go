@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
 // ============================================================
@@ -70,6 +71,27 @@ func BenchmarkBatchQuery100Users(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		benchSink = SimulateBatchQuery(benchUserIDs, benchOrders)
+	}
+}
+
+// --- N+1 vs Batch with Simulated Network Latency ---
+// These benchmarks include time.Sleep to simulate real network round-trip latency.
+// This makes the N+1 problem clearly visible: 100 queries × 1ms = ~100ms vs 1 query × 2ms = ~2ms.
+
+func BenchmarkNPlusOneWithLatency100Users(b *testing.B) {
+	latency := 1 * time.Millisecond
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		benchSink = SimulateNPlusOneWithLatency(benchUserIDs, benchOrders, latency)
+	}
+}
+
+func BenchmarkBatchQueryWithLatency100Users(b *testing.B) {
+	// Batch query is slightly heavier (2ms) but only 1 round-trip
+	latency := 2 * time.Millisecond
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		benchSink = SimulateBatchQueryWithLatency(benchUserIDs, benchOrders, latency)
 	}
 }
 

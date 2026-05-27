@@ -4,6 +4,11 @@
 
 In-memory caching to eliminate redundant expensive operations — with TTL, hit ratio analysis, and implementation comparison.
 
+## TL;DR
+- **Problem**: Without caching, every request triggers a full DB/API round-trip (1-50ms) even for identical data
+- **Solution**: Cache-aside pattern with TTL using RWMutex+map or sync.Map for read-heavy workloads
+- **Impact**: 21,872x faster cache hit vs DB query; 99% DB load reduction enables instance downgrade saving $300-500/month
+
 ## 🎯 Problem Statement
 
 Without caching, every request for the same data triggers a full round-trip:
