@@ -63,7 +63,7 @@ func (d *detector) Detect(ctx types.ASTContext) []types.Finding {
 			Severity:     d.rule.Severity,
 			Category:     d.rule.Category,
 			CodeContext:  ctx.CodeContext,
-			Confidence:   types.ConfidenceMedium,
+			Confidence:   types.ConfidenceLow,
 		})
 	}
 

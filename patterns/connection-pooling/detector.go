@@ -39,43 +39,60 @@ func (d *detector) Rule() types.Rule {
 // Detect analyzes the given AST context and returns findings.
 // Returns an empty slice if no issues are detected or if Node is nil.
 // Does not panic and does not perform file I/O.
+// Only flags connection creation inside function bodies (not package-level init).
 func (d *detector) Detect(ctx types.ASTContext) []types.Finding {
 	if ctx.Node == nil {
 		return []types.Finding{}
 	}
 
+	// Only look at function declarations — connection creation at package level
+	// (e.g., var db = sql.Open(...) in init or main) is typically one-time setup.
+	funcDecl, ok := ctx.Node.(*ast.FuncDecl)
+	if !ok {
+		return []types.Finding{}
+	}
+
+	// Skip init() and main() — these are one-time setup functions
+	if funcDecl.Name != nil {
+		name := funcDecl.Name.Name
+		if name == "init" || name == "main" {
+			return []types.Finding{}
+		}
+	}
+
 	var findings []types.Finding
 
-	// Look for net.Dial, net.DialTimeout, or sql.Open calls inside loops
-	// which indicate connection-per-request anti-pattern.
-	ast.Inspect(ctx.Node, func(n ast.Node) bool {
-		call, ok := n.(*ast.CallExpr)
-		if !ok {
+	// Look for connection creation calls inside the function body
+	if funcDecl.Body != nil {
+		ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+			call, ok := n.(*ast.CallExpr)
+			if !ok {
+				return true
+			}
+
+			if isConnectionCreationCall(call) {
+				findings = append(findings, types.Finding{
+					RuleID:       d.rule.ID,
+					FilePath:     ctx.FilePath,
+					Line:         ctx.Line,
+					Explanation:  "Connection creation detected in a request-handling function. Each call incurs TCP handshake and potentially TLS negotiation overhead. At scale, this wastes network I/O and increases latency significantly.",
+					SuggestedFix: "Move connection creation to application startup (init/main) or use a connection pool. For databases, sql.Open returns a pool — call it once and reuse the *sql.DB.",
+					Severity:     d.rule.Severity,
+					Category:     d.rule.Category,
+					CodeContext:  ctx.CodeContext,
+					Confidence:   types.ConfidenceMedium,
+				})
+			}
+
 			return true
-		}
-
-		if isConnectionCreationCall(call) {
-			findings = append(findings, types.Finding{
-				RuleID:       d.rule.ID,
-				FilePath:     ctx.FilePath,
-				Line:         ctx.Line,
-				Explanation:  "Connection creation detected in a hot path. Each call incurs TCP handshake and potentially TLS negotiation overhead. At scale, this wastes network I/O and increases latency significantly.",
-				SuggestedFix: "Use a connection pool to reuse established connections. For databases, use sql.DB which pools internally. For TCP, implement or use a pool with configurable maxIdle matching your concurrency level.",
-				Severity:     d.rule.Severity,
-				Category:     d.rule.Category,
-				CodeContext:  ctx.CodeContext,
-				Confidence:   types.ConfidenceMedium,
-			})
-		}
-
-		return true
-	})
+		})
+	}
 
 	return findings
 }
 
 // isConnectionCreationCall checks if a call expression looks like a connection creation operation.
-// Whitelists known pooled-by-design libraries (gRPC, pgxpool, go-redis).
+// Whitelists known pooled-by-design libraries (gRPC, pgxpool, go-redis, mongo).
 func isConnectionCreationCall(call *ast.CallExpr) bool {
 	sel, ok := call.Fun.(*ast.SelectorExpr)
 	if !ok {
@@ -89,16 +106,18 @@ func isConnectionCreationCall(call *ast.CallExpr) bool {
 	}
 
 	// Whitelist: known pooled-by-design libraries
-	// gRPC uses HTTP/2 multiplexing — inherently pooled
-	if pkgName == "grpc" {
+	switch pkgName {
+	case "grpc": // gRPC uses HTTP/2 multiplexing — inherently pooled
 		return false
-	}
-	// pgxpool already is a pool
-	if pkgName == "pgxpool" {
+	case "pgxpool": // pgxpool already is a pool
 		return false
-	}
-	// go-redis client manages its own pool
-	if pkgName == "redis" {
+	case "redis": // go-redis client manages its own pool
+		return false
+	case "mongo": // mongo-go-driver manages its own pool
+		return false
+	case "amqp": // RabbitMQ connections are long-lived by design
+		return false
+	case "nats": // NATS connections are long-lived
 		return false
 	}
 
@@ -106,7 +125,7 @@ func isConnectionCreationCall(call *ast.CallExpr) bool {
 	switch sel.Sel.Name {
 	case "Dial", "DialTimeout", "DialContext", "DialTLS":
 		return true
-	case "Open": // sql.Open — note: sql.Open itself returns a pool, but calling it per-request is the anti-pattern
+	case "Open": // sql.Open returns a pool, but calling it per-request is the anti-pattern
 		return true
 	case "Connect":
 		return true
