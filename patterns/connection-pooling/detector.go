@@ -8,7 +8,6 @@ import (
 	"github.com/alpardfm/cost-efficient-go/types"
 )
 
-
 // detector implements types.Detector for connection pooling anti-patterns.
 // It is stateless and safe for concurrent use.
 type detector struct {
@@ -65,6 +64,7 @@ func (d *detector) Detect(ctx types.ASTContext) []types.Finding {
 				Severity:     d.rule.Severity,
 				Category:     d.rule.Category,
 				CodeContext:  ctx.CodeContext,
+				Confidence:   types.ConfidenceMedium,
 			})
 		}
 
@@ -75,9 +75,30 @@ func (d *detector) Detect(ctx types.ASTContext) []types.Finding {
 }
 
 // isConnectionCreationCall checks if a call expression looks like a connection creation operation.
+// Whitelists known pooled-by-design libraries (gRPC, pgxpool, go-redis).
 func isConnectionCreationCall(call *ast.CallExpr) bool {
 	sel, ok := call.Fun.(*ast.SelectorExpr)
 	if !ok {
+		return false
+	}
+
+	// Get the package/receiver identifier if available
+	pkgName := ""
+	if ident, ok := sel.X.(*ast.Ident); ok {
+		pkgName = ident.Name
+	}
+
+	// Whitelist: known pooled-by-design libraries
+	// gRPC uses HTTP/2 multiplexing — inherently pooled
+	if pkgName == "grpc" {
+		return false
+	}
+	// pgxpool already is a pool
+	if pkgName == "pgxpool" {
+		return false
+	}
+	// go-redis client manages its own pool
+	if pkgName == "redis" {
 		return false
 	}
 
@@ -85,7 +106,7 @@ func isConnectionCreationCall(call *ast.CallExpr) bool {
 	switch sel.Sel.Name {
 	case "Dial", "DialTimeout", "DialContext", "DialTLS":
 		return true
-	case "Open": // sql.Open, net.Open, etc.
+	case "Open": // sql.Open — note: sql.Open itself returns a pool, but calling it per-request is the anti-pattern
 		return true
 	case "Connect":
 		return true

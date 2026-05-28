@@ -8,7 +8,6 @@ import (
 	"github.com/alpardfm/cost-efficient-go/types"
 )
 
-
 // detector implements types.Detector for slice performance anti-patterns.
 // It is stateless and safe for concurrent use.
 type detector struct {
@@ -71,6 +70,7 @@ func (d *detector) Detect(ctx types.ASTContext) []types.Finding {
 				Severity:     d.rule.Severity,
 				Category:     d.rule.Category,
 				CodeContext:  ctx.CodeContext,
+				Confidence:   types.ConfidenceHigh,
 			})
 		}
 

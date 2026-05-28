@@ -72,6 +72,11 @@ func (d *detector) Detect(ctx types.ASTContext) []types.Finding {
 
 	// Unbuffered channel: make(chan T) with no second argument
 	if len(callExpr.Args) == 1 {
+		// Skip signal channels — these are intentionally unbuffered
+		if isSignalChannel(callExpr.Args[0]) {
+			return []types.Finding{}
+		}
+
 		codeContext := ctx.CodeContext
 		if codeContext == "" {
 			codeContext = "make(chan T)"
@@ -86,9 +91,42 @@ func (d *detector) Detect(ctx types.ASTContext) []types.Finding {
 			Severity:     d.rule.Severity,
 			Category:     d.rule.Category,
 			CodeContext:  strings.TrimSpace(codeContext),
+			Confidence:   types.ConfidenceMedium,
 		})
 	}
 
 	return findings
 }
 
+// isSignalChannel checks if a channel type is likely a signal channel
+// that should be unbuffered by design.
+// Signal channels: chan struct{}, chan bool, chan error, chan os.Signal
+func isSignalChannel(expr ast.Expr) bool {
+	chanType, ok := expr.(*ast.ChanType)
+	if !ok {
+		return false
+	}
+
+	switch t := chanType.Value.(type) {
+	case *ast.StructType:
+		// chan struct{} — classic done/signal channel
+		if t.Fields == nil || len(t.Fields.List) == 0 {
+			return true
+		}
+	case *ast.Ident:
+		// chan bool, chan error — common signal types
+		switch t.Name {
+		case "bool", "error":
+			return true
+		}
+	case *ast.SelectorExpr:
+		// chan os.Signal
+		if ident, ok := t.X.(*ast.Ident); ok {
+			if ident.Name == "os" && t.Sel.Name == "Signal" {
+				return true
+			}
+		}
+	}
+
+	return false
+}

@@ -8,7 +8,6 @@ import (
 	"github.com/alpardfm/cost-efficient-go/types"
 )
 
-
 // detector implements types.Detector for string building anti-patterns.
 // It is stateless and safe for concurrent use.
 type detector struct {
@@ -83,6 +82,7 @@ func (d *detector) inspectLoopBody(body *ast.BlockStmt, ctx types.ASTContext) []
 				Severity:     d.rule.Severity,
 				Category:     d.rule.Category,
 				CodeContext:  ctx.CodeContext,
+				Confidence:   types.ConfidenceHigh,
 			})
 		}
 

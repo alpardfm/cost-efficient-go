@@ -32,16 +32,26 @@ type Rule struct {
 	ReferenceLinks []string // Links to documentation or pattern README
 }
 
+// Confidence represents how certain the detector is about a finding.
+type Confidence int
+
+const (
+	ConfidenceLow    Confidence = iota // Might be intentional (e.g., unbuffered channel, singleton struct)
+	ConfidenceMedium                   // Likely suboptimal but depends on runtime data size
+	ConfidenceHigh                     // Definitely suboptimal (e.g., += string in large loop)
+)
+
 // Finding represents a single detection result.
 type Finding struct {
-	RuleID       string   // References Rule.ID
-	FilePath     string   // Source file where the issue was found
-	Line         int      // Line number in the source file
-	Explanation  string   // Human-readable description of why this is problematic
-	SuggestedFix string   // Concrete code suggestion or pattern template
-	Severity     Severity // Inherited from the Rule
-	Category     Category // Inherited from the Rule
-	CodeContext  string   // Relevant source code snippet
+	RuleID       string     // References Rule.ID
+	FilePath     string     // Source file where the issue was found
+	Line         int        // Line number in the source file
+	Explanation  string     // Human-readable description of why this is problematic
+	SuggestedFix string     // Concrete code suggestion or pattern template
+	Severity     Severity   // Inherited from the Rule
+	Category     Category   // Inherited from the Rule
+	CodeContext  string     // Relevant source code snippet
+	Confidence   Confidence // How certain the detector is about this finding
 }
 
 // ASTContext carries Go AST information passed to detectors.
