@@ -253,3 +253,11 @@ go test -bench=BenchmarkDisabled -benchmem
 # Check GC behavior with tracing
 GODEBUG=gctrace=1 go run main.go
 ```
+
+
+## When This Is Acceptable
+
+- Application startup/shutdown logging (runs once, not in hot path)
+- Error paths that execute rarely (< 1% of requests)
+- Debug logging behind a level check that is disabled in production
+- CLI tools where throughput is not a concern

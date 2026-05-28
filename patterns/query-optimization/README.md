@@ -224,3 +224,10 @@ go test -bench=. -benchmem -benchtime=3s
 | GIN | Full-text search, JSONB, arrays |
 | GiST | Geometric, range types |
 | pg_trgm + GIN | LIKE '%search%' (trigram) |
+
+
+## When This Is Acceptable
+
+- Admin/backoffice queries that run infrequently (< 10/minute)
+- Data exploration queries during development
+- Queries on small tables (< 1000 rows) where full scan is faster than index lookup

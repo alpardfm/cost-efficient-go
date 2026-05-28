@@ -198,3 +198,10 @@ go test -bench=. -benchmem -benchtime=3s
 | Low (<100 req/s per host) | 5 | 20 |
 | Medium (100-1K req/s) | 20 | 100 |
 | High (>1K req/s) | 50 | 200 |
+
+
+## When This Is Acceptable
+
+- Test code where client lifecycle matches test lifecycle
+- CLI tools making a single HTTP request and exiting
+- Clients that need unique TLS configurations per request (rare)

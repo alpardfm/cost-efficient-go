@@ -258,3 +258,10 @@ err = json.Unmarshal(data, &result)
 ```
 
 > **Recommendation:** Start with struct optimization + `omitempty` (this pattern). Only reach for alternative libraries after profiling confirms `encoding/json` is your bottleneck. The stdlib optimizations give you 2-4x improvement with zero dependencies.
+
+
+## When This Is Acceptable
+
+- Small payloads (< 1KB) where streaming overhead exceeds the benefit
+- Responses that need to be fully buffered anyway (e.g., for signing or hashing)
+- Simple CLI tools processing single JSON files

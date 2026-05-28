@@ -166,3 +166,11 @@ go test -bench=. -benchmem
 # Detailed benchmark (3 seconds per test)
 go test -bench=. -benchmem -benchtime=3s
 ```
+
+
+## When This Is Acceptable
+
+- Structs instantiated once at startup (config, singleton) — padding waste is negligible
+- Structs with fewer than 4 fields where padding is minimal
+- When field ordering reflects logical grouping that aids readability and maintenance
+- Protobuf/generated structs where field order is determined by the schema

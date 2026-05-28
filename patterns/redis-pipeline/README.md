@@ -235,3 +235,10 @@ go test -bench=BenchmarkPool -benchmem
 # Run Lua script benchmarks
 go test -bench=BenchmarkLua -benchmem
 ```
+
+
+## When This Is Acceptable
+
+- Single Redis commands that don't benefit from batching (e.g., one GET per request)
+- Commands that depend on the result of a previous command (sequential dependency)
+- Pub/Sub operations which are inherently streaming

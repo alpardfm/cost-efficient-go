@@ -269,3 +269,10 @@ go test -bench=. -benchmem -benchtime=3s
 go test -bench=BenchmarkUnbuffered -cpuprofile=cpu.prof
 go tool pprof cpu.prof
 ```
+
+
+## When This Is Acceptable
+
+- Signal channels (`chan struct{}`, `chan bool`, `chan error`) used for done/notify patterns — these MUST be unbuffered
+- Channels passed to `context.WithCancel`, `os/signal.Notify`, or similar coordination primitives
+- Low-throughput control channels (< 100 ops/sec) where scheduling overhead is negligible

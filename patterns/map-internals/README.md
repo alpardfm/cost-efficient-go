@@ -156,3 +156,10 @@ go test -bench=. -benchmem
 # Run all benchmarks with longer duration
 go test -bench=. -benchmem -benchtime=2s
 ```
+
+
+## When This Is Acceptable
+
+- Maps with unknown or highly variable size at creation time
+- Small maps (< 10 entries) where pre-allocation overhead exceeds savings
+- Maps used as sets where the exact count doesn't matter

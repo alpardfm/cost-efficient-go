@@ -255,3 +255,10 @@ go test -bench=. -benchmem -benchtime=3s
 # Check context propagation with race detector
 go run -race main.go
 ```
+
+
+## When This Is Acceptable
+
+- Fire-and-forget background tasks that must complete regardless of caller cancellation
+- Cleanup/shutdown operations that should not be interrupted
+- Operations with their own timeout that is shorter than the parent context

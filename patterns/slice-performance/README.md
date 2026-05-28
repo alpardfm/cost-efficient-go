@@ -148,3 +148,10 @@ go test -bench=. -benchmem
 # Detailed benchmarks (3 seconds each)
 go test -bench=. -benchmem -benchtime=3s
 ```
+
+
+## When This Is Acceptable
+
+- Loops iterating fewer than 10 items where reallocation cost is negligible
+- Slices that are immediately discarded after the loop (short-lived, GC-friendly)
+- Cases where the final size is truly unknown and cannot be estimated

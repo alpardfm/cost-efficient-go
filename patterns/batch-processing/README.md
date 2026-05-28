@@ -252,3 +252,10 @@ go test -bench=. -benchmem -benchtime=3s
 # Run with race detector
 go test -race -v
 ```
+
+
+## When This Is Acceptable
+
+- Processing fewer than 10 items where the overhead of batching logic exceeds the savings
+- Real-time/streaming scenarios where items must be processed immediately as they arrive
+- When each item requires unique error handling that batch processing would obscure

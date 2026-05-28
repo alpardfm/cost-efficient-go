@@ -211,3 +211,10 @@ go test -bench=BenchmarkConcurrent -benchmem
 # Check GC behavior (run demo with GC tracing)
 GODEBUG=gctrace=1 go run main.go
 ```
+
+
+## When This Is Acceptable
+
+- Objects that are cheap to allocate (< 64 bytes, no nested allocations)
+- Short-lived objects in low-throughput paths (< 1000 allocs/sec)
+- Objects with complex initialization that can't be safely reset for reuse

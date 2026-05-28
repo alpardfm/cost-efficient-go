@@ -258,3 +258,10 @@ go test -bench=BenchmarkConcat -benchmem -benchtime=3s
 go test -bench=. -benchmem -memprofile=mem.prof
 go tool pprof mem.prof
 ```
+
+
+## When This Is Acceptable
+
+- Concatenating 2-3 fixed strings (e.g., `path + "/" + filename`) — compiler optimizes this
+- String building outside of loops (single concatenation, not repeated)
+- Template-based string construction using `fmt.Sprintf` for readability in non-hot paths

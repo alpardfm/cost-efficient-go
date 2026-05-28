@@ -208,3 +208,10 @@ go test -bench=. -benchmem -benchtime=3s
 - Each request has unique parameters (no reuse)
 - Stale data causes business harm (financial transactions)
 - Cache size would exceed available RAM
+
+
+## When This Is Acceptable
+
+- Data that changes on every request (real-time stock prices, live counters)
+- Security-sensitive data where stale cache could cause authorization bypass
+- Development/debugging environments where cache makes behavior harder to reason about

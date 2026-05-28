@@ -219,3 +219,10 @@ benchstat old.txt new.txt
 - Code is correct but "feels slow" without data
 - Optimizing code that runs once at startup
 - The bottleneck is I/O (network, disk), not CPU/memory
+
+
+## When This Is Acceptable
+
+- Quick smoke-test benchmarks during development (not for production decisions)
+- Comparative benchmarks where absolute numbers don't matter, only relative difference
+- Benchmarks of I/O-bound operations where CPU measurement techniques are less relevant

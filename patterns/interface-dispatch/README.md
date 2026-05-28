@@ -175,3 +175,12 @@ go build -gcflags="-m" .
 # Verbose inlining analysis
 go build -gcflags="-m -m" . 2>&1 | grep -E "(can inline|inlining|devirtualize)"
 ```
+
+
+## When This Is Acceptable
+
+- Almost always acceptable. The 1-3ns overhead per call is negligible for:
+  - API handlers (network latency dominates)
+  - Database operations (I/O dominates)
+  - Any code path that isn't called millions of times per second in a tight loop
+- Only consider concrete types in CPU-bound inner loops processing > 10M iterations

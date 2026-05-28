@@ -211,3 +211,9 @@ go test -bench=. -benchmem -benchtime=3s
 # Check for goroutine leaks in your code
 go test -v -run TestLeak
 ```
+
+
+## When This Is Acceptable
+
+- Long-lived background goroutines that are intentionally designed to run for the application lifetime (e.g., metrics collector, health checker)
+- Goroutines with explicit shutdown via `context.Done()` or `close(quit)` — these are not leaks

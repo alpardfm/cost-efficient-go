@@ -275,3 +275,11 @@ go test -v -run TestConcurrentPoolEfficiency
 - One-shot CLI tools (connect once, do work, exit)
 - WebSocket connections (already long-lived)
 - Connection is used once then never again
+
+
+## When This Is Acceptable
+
+- One-time setup connections at application startup (e.g., `sql.Open` in `main()`)
+- CLI tools that make a single connection, do work, and exit
+- gRPC clients (`grpc.Dial`) which use HTTP/2 multiplexing (pooled by design)
+- Libraries that manage their own internal pool (pgxpool, go-redis)

@@ -201,3 +201,10 @@ go test -bench=. -benchmem -benchtime=3s
 # Check escape analysis (see what allocates)
 go build -gcflags="-m" .
 ```
+
+
+## When This Is Acceptable
+
+- Errors that carry dynamic context (user IDs, request IDs) requiring `fmt.Errorf`
+- Error wrapping with `%w` for proper error chain semantics
+- Low-frequency error paths where allocation cost is negligible

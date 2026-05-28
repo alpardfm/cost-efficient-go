@@ -274,3 +274,10 @@ go test -bench=. -benchmem -benchtime=3s
 | Rate-limited upstream | Worker pool (workers = rate limit) |
 | Long-lived stream processing | Worker pool (reusable workers) |
 | Need error from first failure | `errgroup` (built-in cancellation) |
+
+
+## When This Is Acceptable
+
+- Spawning a small, bounded number of goroutines (< 10) for parallel I/O
+- Short-lived goroutines in request handlers that are bounded by request concurrency
+- Fan-out patterns where the number of goroutines equals the number of known tasks
